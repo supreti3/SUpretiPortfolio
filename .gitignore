@@ -1,0 +1,17 @@
+# Photo file (if you want to keep it private)
+# photo.jpg
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
