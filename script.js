@@ -75,6 +75,7 @@ const observerOptions = {
 const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
             entry.target.style.opacity = '1';
             entry.target.style.transform = 'translateY(0)';
         }
@@ -87,24 +88,26 @@ const animateElements = document.querySelectorAll(
 );
 
 animateElements.forEach(el => {
+    el.classList.add('animate-on-scroll');
     el.style.opacity = '0';
     el.style.transform = 'translateY(30px)';
     el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
     observer.observe(el);
 });
 
-// ===== Typing Effect for Hero Title (Optional Enhancement) =====
-const nameElement = document.querySelector('.name');
-if (nameElement) {
-    const nameText = nameElement.textContent;
-    nameElement.textContent = '';
+// ===== Typing Effect for Hero Subtitle =====
+const subtitleElement = document.querySelector('.hero-subtitle');
+if (subtitleElement) {
+    const subtitleText = subtitleElement.textContent;
+    subtitleElement.setAttribute('aria-label', subtitleText);
+    subtitleElement.textContent = '';
     let i = 0;
     
     function typeWriter() {
-        if (i < nameText.length) {
-            nameElement.textContent += nameText.charAt(i);
+        if (i < subtitleText.length) {
+            subtitleElement.textContent += subtitleText.charAt(i);
             i++;
-            setTimeout(typeWriter, 100);
+            setTimeout(typeWriter, 65);
         }
     }
     
@@ -122,42 +125,141 @@ window.addEventListener('scroll', () => {
     const flowers = document.querySelectorAll('.flower');
     
     if (hero && scrolled < window.innerHeight) {
-        hero.style.transform = `translate3d(0, ${scrolled * 0.3}px, 0)`;
+        hero.style.transform = `translate3d(0, ${scrolled * 0.08}px, 0)`;
     }
     
     if (heroImage && scrolled < window.innerHeight) {
-        const rotateY = scrolled * 0.1;
-        heroImage.style.transform = `translate3d(0, ${scrolled * 0.2}px, ${scrolled * 0.1}px) rotateY(${rotateY}deg)`;
+        const rotateY = scrolled * 0.025;
+        heroImage.style.transform = `translate3d(0, ${scrolled * 0.08}px, ${scrolled * 0.04}px) rotateY(${rotateY}deg)`;
     }
     
     if (heroText && scrolled < window.innerHeight) {
-        heroText.style.transform = `translate3d(0, ${scrolled * 0.15}px, ${scrolled * -0.05}px)`;
+        heroText.style.transform = `translate3d(0, ${scrolled * 0.05}px, ${scrolled * -0.02}px)`;
     }
     
     // Parallax for flowers
     flowers.forEach((flower, index) => {
-        const speed = 0.1 + (index % 3) * 0.05;
+        const speed = 0.03 + (index % 2) * 0.015;
         const offset = scrolled * speed;
-        flower.style.transform = `translate3d(0, ${offset}px, ${offset * 0.5}px)`;
+        flower.style.transform = `translate3d(0, ${offset}px, ${offset * 0.12}px)`;
     });
     
-    // Parallax for project cards
-    const projectCards = document.querySelectorAll('.project-card');
-    projectCards.forEach((card, index) => {
-        const rect = card.getBoundingClientRect();
-        if (rect.top < window.innerHeight && rect.bottom > 0) {
-            const cardScrolled = scrolled - (rect.top + window.scrollY - window.innerHeight);
-            const rotate = cardScrolled * 0.05;
-            card.style.transform = `translate3d(0, ${cardScrolled * 0.1}px, ${cardScrolled * 0.05}px) rotateX(${rotate}deg)`;
+});
+
+// ===== Enhanced Motion & Interaction Layer =====
+function applyStaggeredReveal() {
+    const groups = [
+        '.skills-grid .skill-category',
+        '.projects-grid .project-card',
+        '.timeline .timeline-item',
+        '.leadership-grid .leadership-item',
+        '.contact-info .contact-item'
+    ];
+
+    groups.forEach(selector => {
+        document.querySelectorAll(selector).forEach((el, index) => {
+            el.style.setProperty('--stagger-delay', `${index * 70}ms`);
+        });
+    });
+}
+
+function enableMicroTilt() {
+    const tiltTargets = document.querySelectorAll('.btn, .project-card, .skill-category, .leadership-item, .contact-item');
+    tiltTargets.forEach(target => {
+        target.classList.add('micro-tilt');
+
+        target.addEventListener('mousemove', (event) => {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            const rect = target.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            const rotateX = ((y / rect.height) - 0.5) * -4;
+            const rotateY = ((x / rect.width) - 0.5) * 4;
+            target.style.transform = `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-2px)`;
+        });
+
+        target.addEventListener('mouseleave', () => {
+            target.style.transform = '';
+        });
+    });
+}
+
+function enableCardSpotlight() {
+    const spotlightTargets = document.querySelectorAll(
+        '.skill-category, .project-card, .timeline-content, .leadership-item, .contact-item, .education-card'
+    );
+
+    spotlightTargets.forEach(target => {
+        target.addEventListener('mousemove', (event) => {
+            const rect = target.getBoundingClientRect();
+            const x = ((event.clientX - rect.left) / rect.width) * 100;
+            const y = ((event.clientY - rect.top) / rect.height) * 100;
+            target.style.setProperty('--spotlight-x', `${x}%`);
+            target.style.setProperty('--spotlight-y', `${y}%`);
+        });
+    });
+}
+
+function createScrollProgressBar() {
+    const progress = document.createElement('div');
+    progress.className = 'scroll-progress';
+    progress.innerHTML = '<div class="scroll-progress-bar"></div>';
+    document.body.appendChild(progress);
+
+    const progressBar = progress.querySelector('.scroll-progress-bar');
+    const updateProgress = () => {
+        const scrollTop = window.scrollY;
+        const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const percentage = scrollableHeight > 0 ? (scrollTop / scrollableHeight) * 100 : 0;
+        progressBar.style.width = `${Math.min(100, Math.max(0, percentage))}%`;
+    };
+
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+}
+
+function initializeThemeToggle() {
+    const themeToggle = document.getElementById('theme-toggle');
+    if (!themeToggle) return;
+
+    const savedTheme = localStorage.getItem('theme');
+    const useDark = savedTheme === 'dark';
+
+    if (useDark) {
+        document.body.classList.add('theme-dark');
+    }
+
+    const setToggleIcon = () => {
+        const icon = themeToggle.querySelector('i');
+        icon.className = document.body.classList.contains('theme-dark') ? 'fas fa-sun' : 'fas fa-moon';
+    };
+
+    setToggleIcon();
+
+    themeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('theme-dark');
+        localStorage.setItem('theme', document.body.classList.contains('theme-dark') ? 'dark' : 'light');
+        setToggleIcon();
+    });
+}
+
+function initializeResumeButton() {
+    const resumeBtn = document.querySelector('.resume-btn');
+    if (!resumeBtn) return;
+
+    resumeBtn.addEventListener('click', (event) => {
+        if (resumeBtn.getAttribute('href') === '#') {
+            event.preventDefault();
+            alert('Add your resume file and update the resume button href in index.html.');
         }
     });
-});
+}
 
 // ===== Image Loading Fallback =====
 const profilePhoto = document.getElementById('profile-photo');
 if (profilePhoto) {
     profilePhoto.addEventListener('error', function() {
-        this.src = 'https://via.placeholder.com/350x350/6366f1/ffffff?text=SU';
+        this.src = 'https://placehold.co/350x350/ec4899/ffffff?text=SU';
         this.alt = 'Profile Photo Placeholder';
     });
 }
@@ -276,12 +378,21 @@ function addSkillIcons() {
 // ===== Initialize on page load =====
 document.addEventListener('DOMContentLoaded', () => {
     addSkillIcons();
+    applyStaggeredReveal();
+    enableMicroTilt();
+    enableCardSpotlight();
+    createScrollProgressBar();
+    initializeThemeToggle();
+    initializeResumeButton();
     
     // Update scroll button gradient
     const scrollBtn = document.querySelector('.scroll-top-btn');
     if (scrollBtn) {
         scrollBtn.style.background = 'linear-gradient(135deg, #ec4899 0%, #a855f7 100%)';
     }
+
+    // Trigger staged hero entry animation
+    document.body.classList.add('hero-loaded');
 });
 
 console.log('Portfolio website loaded successfully! 🚀');
