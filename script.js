@@ -54,15 +54,18 @@ window.addEventListener('scroll', activateNavLink);
 // ===== Smooth Scrolling =====
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
+        const href = this.getAttribute('href');
+        if (!href || href === '#') return;
+
+        const target = document.querySelector(href);
+        if (!target) return;
+
         e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            const offsetTop = target.offsetTop - 80;
-            window.scrollTo({
-                top: offsetTop,
-                behavior: 'smooth'
-            });
-        }
+        const offsetTop = target.getBoundingClientRect().top + window.pageYOffset - 80;
+        window.scrollTo({
+            top: Math.max(0, offsetTop),
+            behavior: 'smooth'
+        });
     });
 });
 
@@ -243,15 +246,21 @@ function initializeThemeToggle() {
     });
 }
 
-function initializeResumeButton() {
-    const resumeBtn = document.querySelector('.resume-btn');
-    if (!resumeBtn) return;
-
-    resumeBtn.addEventListener('click', (event) => {
-        if (resumeBtn.getAttribute('href') === '#') {
+function initializeSocialButtons() {
+    const socialLinks = document.querySelectorAll('.hero-social a');
+    socialLinks.forEach((link) => {
+        link.addEventListener('click', (event) => {
             event.preventDefault();
-            alert('Add your resume file and update the resume button href in index.html.');
-        }
+            const href = link.getAttribute('href');
+            if (!href) return;
+
+            if (href.startsWith('mailto:')) {
+                window.location.href = href;
+                return;
+            }
+
+            window.open(href, '_blank', 'noopener,noreferrer');
+        });
     });
 }
 
@@ -383,7 +392,7 @@ document.addEventListener('DOMContentLoaded', () => {
     enableCardSpotlight();
     createScrollProgressBar();
     initializeThemeToggle();
-    initializeResumeButton();
+    initializeSocialButtons();
     
     // Update scroll button gradient
     const scrollBtn = document.querySelector('.scroll-top-btn');

@@ -333,6 +333,7 @@ body {
     display: flex;
     gap: 1rem;
     margin-bottom: 2rem;
+    flex-wrap: wrap;
 }
 
 .btn {
@@ -343,6 +344,8 @@ body {
     transition: var(--transition);
     display: inline-block;
     border: 2px solid transparent;
+    min-width: 170px;
+    text-align: center;
 }
 
 .btn-primary {
@@ -372,6 +375,7 @@ body {
     opacity: 0;
     transition: var(--transition);
     animation: heartFloat 3s ease-in-out infinite;
+    pointer-events: none;
 }
 
 .btn-primary:hover::before {
@@ -2223,6 +2227,7 @@ button:focus-visible,
     transform: translateX(-120%);
     background: linear-gradient(110deg, transparent 0%, rgba(255, 255, 255, 0.35) 45%, transparent 100%);
     transition: transform 0.55s ease;
+    pointer-events: none;
 }
 
 .btn:hover::before {
@@ -2262,6 +2267,8 @@ button:focus-visible,
 
 .hero-social a[data-tooltip] {
     position: relative;
+    pointer-events: auto;
+    z-index: 2;
 }
 
 .hero-social a[data-tooltip]::after {
@@ -2279,6 +2286,15 @@ button:focus-visible,
     pointer-events: none;
     transition: opacity 0.2s ease, transform 0.2s ease;
     white-space: nowrap;
+}
+
+.hero-social {
+    position: relative;
+    z-index: 8;
+}
+
+.hero-social a::before {
+    pointer-events: none;
 }
 
 .hero-social a[data-tooltip]:hover::after {
